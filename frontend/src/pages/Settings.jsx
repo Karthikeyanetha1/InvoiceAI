@@ -3,117 +3,204 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import api from '../utils/api'
 import toast from 'react-hot-toast'
+
 export default function Settings() {
-  const { user, refreshUser, logout } = useAuth()
+  const { user, logout } = useAuth()
   const navigate = useNavigate()
-  const [form, setForm] = useState({
-    companyName:user?.businessInfo?.companyName||'',
-    address:user?.businessInfo?.address||'',
-    phone:user?.businessInfo?.phone||'',
-    email:user?.businessInfo?.email||'',
-    taxId:user?.businessInfo?.taxId||'',
-    currency:user?.businessInfo?.currency||'INR'
-  })
   const [saving, setSaving] = useState(false)
-  const [pwForm, setPwForm] = useState({current:'',newPw:'',confirm:''})
   const [pwLoading, setPwLoading] = useState(false)
   const [showLogout, setShowLogout] = useState(false)
+  const [companyName, setCompanyName] = useState(user?.businessInfo?.companyName || '')
+  const [address, setAddress] = useState(user?.businessInfo?.address || '')
+  const [phone, setPhone] = useState(user?.businessInfo?.phone || '')
+  const [email, setEmail] = useState(user?.businessInfo?.email || '')
+  const [taxId, setTaxId] = useState(user?.businessInfo?.taxId || '')
+  const [currency, setCurrency] = useState(user?.businessInfo?.currency || 'INR')
+  const [currentPw, setCurrentPw] = useState('')
+  const [newPw, setNewPw] = useState('')
+  const [confirmPw, setConfirmPw] = useState('')
 
   const handleSave = async () => {
     setSaving(true)
-    try { await api.put('/auth/business-info', form); await refreshUser(); toast.success('Business info saved! ✓') }
-    catch { toast.error('Save failed') }
+    try {
+      await api.put('/auth/profile', {
+        businessInfo: { companyName, address, phone, email, taxId, currency }
+      })
+      toast.success('Business profile saved!')
+    } catch { toast.error('Save failed') }
     finally { setSaving(false) }
   }
-  const handleChangePw = async (e) => {
-    e.preventDefault()
-    if (pwForm.newPw !== pwForm.confirm) return toast.error('Passwords do not match')
-    if (pwForm.newPw.length < 6) return toast.error('Min 6 characters')
+
+  const handlePassword = async () => {
+    if (!currentPw || !newPw) return toast.error('Fill all fields')
+    if (newPw !== confirmPw) return toast.error('Passwords do not match')
+    if (newPw.length < 6) return toast.error('Min 6 characters')
     setPwLoading(true)
-    try { await api.put('/auth/change-password', {currentPassword:pwForm.current,newPassword:pwForm.newPw}); toast.success('Password changed!'); setPwForm({current:'',newPw:'',confirm:''}) }
-    catch (err) { toast.error(err.response?.data?.error || 'Password change failed') }
+    try {
+      await api.put('/auth/change-password', { currentPassword: currentPw, newPassword: newPw })
+      toast.success('Password changed!')
+      setCurrentPw(''); setNewPw(''); setConfirmPw('')
+    } catch(err) { toast.error(err.response?.data?.error || 'Failed') }
     finally { setPwLoading(false) }
   }
-  const handleLogout = () => { logout(); toast.success('Logged out'); navigate('/login') }
 
-  const S = ({title,children}) => (
-    <div className="card" style={{marginBottom:18}}>
-      <div style={{fontSize:11,fontWeight:700,color:'var(--text3)',letterSpacing:1.5,textTransform:'uppercase',marginBottom:18,paddingBottom:12,borderBottom:'2px solid var(--bg3)'}}>{title}</div>
-      {children}
-    </div>
-  )
+  const handleLogout = () => { logout(); navigate('/login') }
+
+  const inputStyle = {
+    width: '100%',
+    padding: '9px 12px',
+    border: '1px solid #d1d5db',
+    borderRadius: '8px',
+    fontSize: '0.875rem',
+    outline: 'none',
+    background: '#ffffff',
+    color: '#111827',
+    boxSizing: 'border-box'
+  }
+
+  const labelStyle = {
+    display: 'block',
+    marginBottom: 5,
+    fontSize: '0.78rem',
+    fontWeight: 600,
+    color: '#374151'
+  }
+
   return (
-    <div style={{padding:'28px 32px',maxWidth:680,animation:'fadeIn .3s ease'}}>
-      <div style={{marginBottom:24}}>
-        <h1 style={{fontSize:24,fontWeight:800,letterSpacing:-0.5,marginBottom:4}}>Settings</h1>
-        <p style={{color:'var(--text3)',fontSize:14}}>Manage your account and business profile.</p>
-      </div>
-      <S title="Account">
-        <div style={{display:'flex',alignItems:'center',gap:16}}>
-          <div style={{width:56,height:56,borderRadius:'50%',background:'linear-gradient(135deg,#16a34a,#22c55e)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:22,fontWeight:700,color:'#fff',boxShadow:'0 4px 14px rgba(22,163,74,0.3)',flexShrink:0}}>
-            {user?.name?.[0]?.toUpperCase()}
-          </div>
-          <div style={{flex:1}}>
-            <div style={{fontWeight:700,fontSize:16,color:'var(--text)'}}>{user?.name}</div>
-            <div style={{fontSize:13,color:'var(--text3)',marginTop:2}}>{user?.email}</div>
-            <span style={{fontSize:11,fontWeight:700,background:'var(--accent-light)',color:'var(--accent)',padding:'3px 12px',borderRadius:20,textTransform:'uppercase',letterSpacing:0.5,marginTop:6,display:'inline-block'}}>{user?.plan||'free'} plan</span>
-          </div>
-          <button className="btn btn-ghost" onClick={()=>setShowLogout(true)} style={{color:'var(--danger)',borderColor:'#fca5a5',fontSize:13}}>Sign Out</button>
+      <div style={{ padding: '28px 32px', maxWidth: 680, fontFamily: 'Inter, sans-serif' }}>
+        <div style={{ marginBottom: 28 }}>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#111827', marginBottom: 4 }}>Settings</h1>
+          <p style={{ color: '#6b7280', fontSize: '0.875rem' }}>Manage your account and business information</p>
         </div>
-        {showLogout&&(
-          <div style={{marginTop:14,padding:'14px 16px',background:'#fef2f2',border:'1px solid #fca5a5',borderRadius:10,display:'flex',alignItems:'center',justifyContent:'space-between',gap:12}}>
-            <span style={{fontSize:13,color:'var(--danger)',fontWeight:500}}>Are you sure you want to sign out?</span>
-            <div style={{display:'flex',gap:8}}>
-              <button className="btn btn-ghost" onClick={()=>setShowLogout(false)} style={{padding:'6px 14px',fontSize:12}}>Cancel</button>
-              <button onClick={handleLogout} style={{background:'var(--danger)',color:'#fff',border:'none',padding:'7px 16px',borderRadius:8,fontSize:12,fontWeight:600,cursor:'pointer'}}>Yes, Sign Out</button>
+
+        {/* Account */}
+        <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 12, padding: 20, marginBottom: 16 }}>
+          <h2 style={{ fontSize: '0.875rem', fontWeight: 600, color: '#374151', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 16 }}>Account</h2>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{ width: 44, height: 44, borderRadius: '50%', background: '#16a34a', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, fontWeight: 700 }}>
+                {user?.name?.[0]?.toUpperCase()}
+              </div>
+              <div>
+                <div style={{ fontWeight: 600, color: '#111827', fontSize: '0.95rem' }}>{user?.name}</div>
+                <div style={{ color: '#6b7280', fontSize: '0.82rem' }}>{user?.email}</div>
+                <div style={{ color: '#16a34a', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', marginTop: 2 }}>{user?.plan || 'free'} plan</div>
+              </div>
+            </div>
+            {showLogout ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontSize: '0.82rem', color: '#374151' }}>Sign out?</span>
+                  <button onClick={handleLogout}
+                          style={{ padding: '7px 14px', background: '#dc2626', color: '#fff', border: 'none', borderRadius: 7, cursor: 'pointer', fontSize: '0.82rem', fontWeight: 600 }}>
+                    Yes
+                  </button>
+                  <button onClick={() => setShowLogout(false)}
+                          style={{ padding: '7px 14px', background: '#f3f4f6', color: '#374151', border: '1px solid #d1d5db', borderRadius: 7, cursor: 'pointer', fontSize: '0.82rem' }}>
+                    Cancel
+                  </button>
+                </div>
+            ) : (
+                <button onClick={() => setShowLogout(true)}
+                        style={{ padding: '8px 18px', background: '#fff', color: '#374151', border: '1.5px solid #d1d5db', borderRadius: 8, cursor: 'pointer', fontSize: '0.85rem', fontWeight: 500 }}>
+                  Sign Out
+                </button>
+            )}
+          </div>
+        </div>
+
+        {/* Business Profile */}
+        <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 12, padding: 20, marginBottom: 16 }}>
+          <h2 style={{ fontSize: '0.875rem', fontWeight: 600, color: '#374151', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 16 }}>Business Profile</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
+            <div>
+              <label style={labelStyle}>Company / Business Name</label>
+              <input style={inputStyle} type="text" placeholder="e.g. Karthikeya Tech Solutions"
+                     value={companyName} onChange={e => setCompanyName(e.target.value)} />
+            </div>
+            <div>
+              <label style={labelStyle}>Phone Number</label>
+              <input style={inputStyle} type="tel" placeholder="+91 9999999999"
+                     value={phone} onChange={e => setPhone(e.target.value)} />
+            </div>
+            <div>
+              <label style={labelStyle}>Business Email</label>
+              <input style={inputStyle} type="email" placeholder="business@email.com"
+                     value={email} onChange={e => setEmail(e.target.value)} />
+            </div>
+            <div>
+              <label style={labelStyle}>GST / Tax ID (optional)</label>
+              <input style={inputStyle} type="text" placeholder="27AAPFU0939F1ZV"
+                     value={taxId} onChange={e => setTaxId(e.target.value)} />
             </div>
           </div>
-        )}
-      </S>
-      <S title="Business Profile">
-        <div style={{display:'flex',flexDirection:'column',gap:14}}>
-          {[{k:'companyName',l:'Company / Business Name',p:'e.g. Mukul Aqua Services',t:'text'},{k:'address',l:'Business Address',p:'City, State, PIN',m:true},{k:'phone',l:'Phone Number',p:'+91 XXXXXXXXXX',t:'tel'},{k:'email',l:'Business Email',p:'business@email.com',t:'email'},{k:'taxId',l:'GST / Tax ID (optional)',p:'27AAPFU0939F1ZV',t:'text'}].map(f=>(
-            <div key={f.k}>
-              <label style={{display:'block',fontSize:12,fontWeight:600,color:'var(--text2)',marginBottom:6}}>{f.l}</label>
-              {f.m?<textarea value={form[f.k]} onChange={e=>setForm(fm=>({...fm,[f.k]:e.target.value}))} placeholder={f.p} rows={2}/>:<input type={f.t||'text'} value={form[f.k]} onChange={e=>setForm(fm=>({...fm,[f.k]:e.target.value}))} placeholder={f.p}/>}
-            </div>
-          ))}
-          <div>
-            <label style={{display:'block',fontSize:12,fontWeight:600,color:'var(--text2)',marginBottom:6}}>Default Currency</label>
-            <select value={form.currency} onChange={e=>setForm(f=>({...f,currency:e.target.value}))} style={{maxWidth:220}}>
+          <div style={{ marginBottom: 14 }}>
+            <label style={labelStyle}>Business Address</label>
+            <textarea style={{ ...inputStyle, resize: 'vertical', minHeight: 70 }} placeholder="City, State, PIN"
+                      value={address} onChange={e => setAddress(e.target.value)} />
+          </div>
+          <div style={{ marginBottom: 18 }}>
+            <label style={labelStyle}>Default Currency</label>
+            <select style={{ ...inputStyle, width: 'auto', paddingRight: 32 }}
+                    value={currency} onChange={e => setCurrency(e.target.value)}>
               <option value="INR">₹ INR — Indian Rupee</option>
               <option value="USD">$ USD — US Dollar</option>
               <option value="EUR">€ EUR — Euro</option>
               <option value="GBP">£ GBP — British Pound</option>
             </select>
           </div>
+          <button onClick={handleSave} disabled={saving}
+                  style={{ padding: '10px 24px', background: '#16a34a', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontSize: '0.875rem', fontWeight: 600, opacity: saving ? 0.7 : 1 }}>
+            {saving ? 'Saving...' : 'Save Business Info'}
+          </button>
         </div>
-        <button className="btn btn-primary" onClick={handleSave} disabled={saving} style={{marginTop:18}}>
-          {saving?<><span className="spinner"/>Saving...</>:'✓ Save Business Info'}
-        </button>
-      </S>
-      <S title="Change Password">
-        <form onSubmit={handleChangePw}>
-          <div style={{display:'flex',flexDirection:'column',gap:14}}>
-            {[{k:'current',l:'Current Password',p:'Enter current password'},{k:'newPw',l:'New Password',p:'Min 6 characters'},{k:'confirm',l:'Confirm New Password',p:'Repeat new password'}].map(f=>(
-              <div key={f.k}>
-                <label style={{display:'block',fontSize:12,fontWeight:600,color:'var(--text2)',marginBottom:6}}>{f.l}</label>
-                <input type="password" placeholder={f.p} value={pwForm[f.k]} onChange={e=>setPwForm(p=>({...p,[f.k]:e.target.value}))}/>
-              </div>
+
+        {/* Change Password */}
+        <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 12, padding: 20, marginBottom: 16 }}>
+          <h2 style={{ fontSize: '0.875rem', fontWeight: 600, color: '#374151', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 16 }}>Change Password</h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, maxWidth: 360 }}>
+            <div>
+              <label style={labelStyle}>Current Password</label>
+              <input style={inputStyle} type="password" placeholder="Enter current password"
+                     value={currentPw} onChange={e => setCurrentPw(e.target.value)} />
+            </div>
+            <div>
+              <label style={labelStyle}>New Password</label>
+              <input style={inputStyle} type="password" placeholder="Min 6 characters"
+                     value={newPw} onChange={e => setNewPw(e.target.value)} />
+            </div>
+            <div>
+              <label style={labelStyle}>Confirm New Password</label>
+              <input style={inputStyle} type="password" placeholder="Repeat new password"
+                     value={confirmPw} onChange={e => setConfirmPw(e.target.value)} />
+            </div>
+            <button onClick={handlePassword} disabled={pwLoading}
+                    style={{ padding: '10px 24px', background: '#1e3a5f', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontSize: '0.875rem', fontWeight: 600, alignSelf: 'flex-start', opacity: pwLoading ? 0.7 : 1 }}>
+              {pwLoading ? 'Updating...' : 'Update Password'}
+            </button>
+          </div>
+        </div>
+
+        {/* Usage */}
+        <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 12, padding: 20 }}>
+          <h2 style={{ fontSize: '0.875rem', fontWeight: 600, color: '#374151', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 16 }}>Usage & Plan</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 16 }}>
+            {[
+              { label: 'AI Generations', value: user?.usageCount || 0, color: '#2563eb' },
+              { label: 'Current Plan', value: user?.plan || 'Free', color: '#16a34a' },
+              { label: 'Monthly Limit', value: user?.plan === 'free' ? '20' : '∞', color: '#7c3aed' },
+            ].map((s, i) => (
+                <div key={i} style={{ textAlign: 'center', padding: '14px 12px', background: '#f9fafb', borderRadius: 10, border: '1px solid #e5e7eb' }}>
+                  <div style={{ fontSize: '1.5rem', fontWeight: 800, color: s.color, marginBottom: 4 }}>{s.value}</div>
+                  <div style={{ fontSize: '0.72rem', color: '#6b7280', fontWeight: 500 }}>{s.label}</div>
+                </div>
             ))}
           </div>
-          <button type="submit" className="btn btn-secondary" disabled={pwLoading} style={{marginTop:18}}>
-            {pwLoading?<><span className="spinner-dark"/>Updating...</>:'🔒 Update Password'}
-          </button>
-        </form>
-      </S>
-      <S title="Usage & Plan">
-        <div style={{display:'flex',gap:32,marginBottom:16}}>
-          <div><div style={{fontSize:32,fontWeight:800,fontFamily:'Syne,sans-serif',color:'var(--accent)'}}>{user?.usageCount??0}</div><div style={{fontSize:12,color:'var(--text3)',marginTop:2}}>AI Generations Used</div></div>
-          <div><div style={{fontSize:32,fontWeight:800,fontFamily:'Syne,sans-serif',color:'var(--text)'}}>{user?.plan==='free'?'20':'∞'}</div><div style={{fontSize:12,color:'var(--text3)',marginTop:2}}>Monthly Limit</div></div>
+          {user?.plan === 'free' && (
+              <div style={{ padding: '12px 16px', background: '#f0fdf4', border: '1px solid #86efac', borderRadius: 8, fontSize: '0.85rem', color: '#15803d' }}>
+                Upgrade to <strong>Pro</strong> for unlimited AI generations and custom branding.
+              </div>
+          )}
         </div>
-        {user?.plan==='free'&&<div style={{padding:'14px 18px',background:'linear-gradient(135deg,#dcfce7,#bbf7d0)',border:'1px solid #86efac',borderRadius:12,fontSize:13,color:'#15803d'}}>✦ Upgrade to <strong>Pro</strong> for unlimited AI generations and custom branding.</div>}
-      </S>
-    </div>
+      </div>
   )
 }

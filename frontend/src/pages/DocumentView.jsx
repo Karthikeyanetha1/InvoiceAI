@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import api from '../utils/api'
 import toast from 'react-hot-toast'
+import RazorpayButton from '../components/RazorpayButton'
 
 const TEMPLATES = [
   { id:'modern',  label:'Modern',  desc:'Green accent, clean', color:'#16a34a', bg:'#f0fdf4', icon:'🟢' },
@@ -319,6 +320,22 @@ export default function DocumentView() {
               <button className="btn btn-ghost" onClick={()=>{navigator.clipboard.writeText(`${doc.documentNumber} | ₹${(doc.total||0).toLocaleString('en-IN')}`);toast.success('Copied!')}} style={{justifyContent:'center',fontSize:'0.82rem'}}>
                 ⎘ Copy Summary
               </button>
+            </div>
+          </div>
+          {/* Payment */}
+          <div className="card" style={{padding:18}}>
+            <div className="section-label">Payment</div>
+            <div style={{marginTop:10}}>
+              <div style={{display:'flex',justifyContent:'space-between',fontSize:'0.82rem',marginBottom:10}}>
+                <span style={{color:'var(--text3)'}}>Amount Due</span>
+                <span style={{fontWeight:800,color:'var(--green)',fontSize:'1rem'}}>
+        ₹{(doc.total||0).toLocaleString('en-IN')}
+      </span>
+              </div>
+              <RazorpayButton
+                  doc={doc}
+                  onPaid={updated=>{setDoc(updated);setForm(updated)}}
+              />
             </div>
           </div>
 
