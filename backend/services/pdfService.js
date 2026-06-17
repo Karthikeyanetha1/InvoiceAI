@@ -561,4 +561,4 @@ function generateInvoiceHTML(document, businessInfo, template='auto') {
     }
 }
 
-module.exports = { generateInvoiceHTML }s
+module.exports = { generateInvoiceHTML }
