@@ -1,17 +1,17 @@
 function getCurrencySymbol(currency) {
-  return { INR:'₹', USD:'$', EUR:'€', GBP:'£' }[currency] || currency;
+    return { INR:'₹', USD:'$', EUR:'€', GBP:'£' }[currency] || currency;
 }
 function fmt(amount, currency) {
-  return `${getCurrencySymbol(currency)}${(amount||0).toLocaleString('en-IN',{minimumFractionDigits:2})}`;
+    return `${getCurrencySymbol(currency)}${(amount||0).toLocaleString('en-IN',{minimumFractionDigits:2})}`;
 }
 function statusColor(status) {
-  return {paid:'#16a34a',sent:'#2563eb',draft:'#d97706',cancelled:'#dc2626'}[status]||'#6b7280';
+    return {paid:'#16a34a',sent:'#2563eb',draft:'#d97706',cancelled:'#dc2626'}[status]||'#6b7280';
 }
 function today() {
-  return new Date().toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'});
+    return new Date().toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'});
 }
 function dueStr(dueDate) {
-  return dueDate ? new Date(dueDate).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'}) : null;
+    return dueDate ? new Date(dueDate).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'}) : null;
 }
 
 const PRINT_BTN = (bg='#16a34a') => `
@@ -22,17 +22,17 @@ const PRINT_BTN = (bg='#16a34a') => `
 
 // ── INVOICE TEMPLATE (Professional table - like CFI Excel style) ──
 function templateInvoice(doc, biz) {
-  const cur = doc.currency||'INR'
-  const client = doc.clientInfo||{}
-  const due = dueStr(doc.dueDate)
-  const items = (doc.lineItems||[]).map((item,i)=>`
+    const cur = doc.currency||'INR'
+    const client = doc.clientInfo||{}
+    const due = dueStr(doc.dueDate)
+    const items = (doc.lineItems||[]).map((item,i)=>`
     <tr style="background:${i%2===0?'#fff':'#f8fafc'}">
       <td style="padding:11px 14px;border:1px solid #e2e8f0;font-size:13px;color:#111827">${item.description}</td>
       <td style="padding:11px 14px;border:1px solid #e2e8f0;font-size:13px;text-align:center;color:#374151">${item.quantity}</td>
       <td style="padding:11px 14px;border:1px solid #e2e8f0;font-size:13px;text-align:right;color:#374151">${fmt(item.rate,cur)}</td>
       <td style="padding:11px 14px;border:1px solid #e2e8f0;font-size:13px;font-weight:700;text-align:right;color:#1e3a5f">${fmt(item.amount,cur)}</td>
     </tr>`).join('')
-  return `<!DOCTYPE html><html><head><meta charset="UTF-8">
+    return `<!DOCTYPE html><html><head><meta charset="UTF-8">
 <style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Segoe UI',Arial,sans-serif;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}.page{max-width:794px;margin:0 auto;padding:0}@media print{.no-print{display:none}}</style>
 </head><body>
 <div class="page">
@@ -115,17 +115,17 @@ ${PRINT_BTN('#1e3a5f')}
 
 // ── QUOTATION TEMPLATE (Green corporate style - like Canva reference) ──
 function templateQuotation(doc, biz) {
-  const cur = doc.currency||'INR'
-  const client = doc.clientInfo||{}
-  const due = dueStr(doc.dueDate)
-  const items = (doc.lineItems||[]).map((item,i)=>`
+    const cur = doc.currency||'INR'
+    const client = doc.clientInfo||{}
+    const due = dueStr(doc.dueDate)
+    const items = (doc.lineItems||[]).map((item,i)=>`
     <tr style="background:${i%2===0?'#fff':'#f0fdf4'}">
       <td style="padding:11px 16px;border:1px solid #d1fae5;font-size:13px;color:#111827">${item.description}</td>
       <td style="padding:11px 16px;border:1px solid #d1fae5;font-size:13px;text-align:center;color:#374151">${item.quantity}</td>
       <td style="padding:11px 16px;border:1px solid #d1fae5;font-size:13px;text-align:right;color:#374151">${fmt(item.rate,cur)}</td>
       <td style="padding:11px 16px;border:1px solid #d1fae5;font-size:13px;font-weight:700;text-align:right;color:#16a34a">${fmt(item.amount,cur)}</td>
     </tr>`).join('')
-  return `<!DOCTYPE html><html><head><meta charset="UTF-8">
+    return `<!DOCTYPE html><html><head><meta charset="UTF-8">
 <style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Segoe UI',Arial,sans-serif;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}.page{max-width:794px;margin:0 auto}@media print{.no-print{display:none}}</style>
 </head><body>
 <div class="page">
@@ -207,14 +207,14 @@ ${PRINT_BTN('#16a34a')}
 
 // ── RECEIPT TEMPLATE (Clean minimal receipt style) ──
 function templateReceipt(doc, biz) {
-  const cur = doc.currency||'INR'
-  const client = doc.clientInfo||{}
-  const items = (doc.lineItems||[]).map(item=>`
+    const cur = doc.currency||'INR'
+    const client = doc.clientInfo||{}
+    const items = (doc.lineItems||[]).map(item=>`
     <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dashed #e2e8f0">
       <span style="font-size:13px;color:#374151;font-weight:500;font-family:'Courier New',monospace;text-transform:uppercase">${item.description}</span>
       <span style="font-size:13px;font-weight:700;color:#111827;font-family:'Courier New',monospace">${fmt(item.amount,cur)}</span>
     </div>`).join('')
-  return `<!DOCTYPE html><html><head><meta charset="UTF-8">
+    return `<!DOCTYPE html><html><head><meta charset="UTF-8">
 <style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Courier New',Courier,monospace;background:#f5f5f0;-webkit-print-color-adjust:exact;print-color-adjust:exact}.page{max-width:420px;margin:0 auto;padding:20px}@media print{.no-print{display:none}body{background:#fff}}</style>
 </head><body>
 <div class="page">
@@ -290,17 +290,17 @@ ${PRINT_BTN('#16a34a')}
 
 // ── PURCHASE ORDER TEMPLATE (Professional order form) ──
 function templatePurchaseOrder(doc, biz) {
-  const cur = doc.currency||'INR'
-  const client = doc.clientInfo||{}
-  const due = dueStr(doc.dueDate)
-  const items = (doc.lineItems||[]).map((item,i)=>`
+    const cur = doc.currency||'INR'
+    const client = doc.clientInfo||{}
+    const due = dueStr(doc.dueDate)
+    const items = (doc.lineItems||[]).map((item,i)=>`
     <tr style="background:${i%2===0?'#fff':'#f8f9fa'}">
       <td style="padding:10px 14px;border:1px solid #dee2e6;font-size:13px;color:#212529">${item.description}</td>
       <td style="padding:10px 14px;border:1px solid #dee2e6;font-size:13px;text-align:center;color:#495057">${item.quantity}</td>
       <td style="padding:10px 14px;border:1px solid #dee2e6;font-size:13px;text-align:right;color:#495057">${fmt(item.rate,cur)}</td>
       <td style="padding:10px 14px;border:1px solid #dee2e6;font-size:13px;font-weight:700;text-align:right;color:#212529">${fmt(item.amount,cur)}</td>
     </tr>`).join('')
-  return `<!DOCTYPE html><html><head><meta charset="UTF-8">
+    return `<!DOCTYPE html><html><head><meta charset="UTF-8">
 <style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,'Helvetica Neue',sans-serif;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}.page{max-width:794px;margin:0 auto;padding:0}@media print{.no-print{display:none}}</style>
 </head><body>
 <div class="page">
@@ -384,35 +384,35 @@ ${PRINT_BTN('#212529')}
 
 // ── CUSTOM FORM TEMPLATE (Elegant order form - like Liceria & Co reference) ──
 function templateCustomForm(doc, biz) {
-  const sections = (doc.lineItems||[])
-  const fld = (label, type='line') => {
-    if(type==='box') return `<div style="margin-bottom:16px"><div style="font-size:10px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px">${label}</div><div style="border:1px solid #d1d5db;border-radius:4px;min-height:64px;padding:8px"></div></div>`
-    if(type==='check') return `<div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px"><div style="width:14px;height:14px;border:1.5px solid #374151;border-radius:2px;flex-shrink:0;margin-top:1px"></div><div style="font-size:12px;color:#374151">${label}</div></div>`
-    if(type==='upload') return `<div style="margin-bottom:16px"><div style="font-size:10px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px">${label}</div><div style="border:2px dashed #9ca3af;border-radius:6px;padding:16px;text-align:center;color:#9ca3af;font-size:12px">📎 Attach Document Here</div></div>`
-    return `<div style="margin-bottom:16px"><div style="font-size:10px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px">${label}</div><div style="border-bottom:1.5px solid #d1d5db;min-height:28px;padding:4px 0"></div></div>`
-  }
+    const sections = (doc.lineItems||[])
+    const fld = (label, type='line') => {
+        if(type==='box') return `<div style="margin-bottom:16px"><div style="font-size:10px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px">${label}</div><div style="border:1px solid #d1d5db;border-radius:4px;min-height:64px;padding:8px"></div></div>`
+        if(type==='check') return `<div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px"><div style="width:14px;height:14px;border:1.5px solid #374151;border-radius:2px;flex-shrink:0;margin-top:1px"></div><div style="font-size:12px;color:#374151">${label}</div></div>`
+        if(type==='upload') return `<div style="margin-bottom:16px"><div style="font-size:10px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px">${label}</div><div style="border:2px dashed #9ca3af;border-radius:6px;padding:16px;text-align:center;color:#9ca3af;font-size:12px">📎 Attach Document Here</div></div>`
+        return `<div style="margin-bottom:16px"><div style="font-size:10px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px">${label}</div><div style="border-bottom:1.5px solid #d1d5db;min-height:28px;padding:4px 0"></div></div>`
+    }
 
-  const secHTML = sections.map(s => {
-    const d = s.description.toLowerCase()
-    const title = s.description.split('–')[0].split(':')[0].trim()
-    let fields = ''
-    if(d.includes('personal')||d.includes('detail')||d.includes('contact')||d.includes('customer')) {
-      fields += `<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">${fld('Full Name')}${fld('Date')}</div>${fld('Phone Number')}${fld('Email Address')}${fld('Address','box')}`
-    }
-    if(d.includes('service')||d.includes('project')||d.includes('requirement')||d.includes('item')) {
-      fields += `<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">${fld('Item / Service')}${fld('Quantity')}</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">${fld('Price (₹)')}${fld('Total (₹)')}</div>${fld('Additional Notes','box')}`
-    }
-    if(d.includes('upload')||d.includes('document')) {
-      fields += `<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">${fld('Primary Document','upload')}${fld('Supporting Document','upload')}</div>`
-    }
-    if(d.includes('signature')||d.includes('declaration')||d.includes('agreement')) {
-      fields += fld('I agree to the Terms and Conditions','check')+fld('All information provided is accurate and complete','check')+`<div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:20px"><div><div style="border-bottom:1.5px solid #111827;margin-top:40px"></div><div style="font-size:9px;color:#9ca3af;margin-top:5px;text-align:center;text-transform:uppercase;letter-spacing:0.5px">Signature</div></div><div><div style="border-bottom:1.5px solid #111827;margin-top:40px"></div><div style="font-size:9px;color:#9ca3af;margin-top:5px;text-align:center;text-transform:uppercase;letter-spacing:0.5px">Date</div></div></div>`
-    }
-    if(!fields) fields = fld('Details','box')
-    return `<div style="margin-bottom:24px;border:1px solid #e5e7eb;border-radius:6px;overflow:hidden"><div style="background:#111827;padding:10px 18px;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#fff">${title}</div><div style="padding:18px">${fields}</div></div>`
-  }).join('')
+    const secHTML = sections.map(s => {
+        const d = s.description.toLowerCase()
+        const title = s.description.split('–')[0].split(':')[0].trim()
+        let fields = ''
+        if(d.includes('personal')||d.includes('detail')||d.includes('contact')||d.includes('customer')) {
+            fields += `<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">${fld('Full Name')}${fld('Date')}</div>${fld('Phone Number')}${fld('Email Address')}${fld('Address','box')}`
+        }
+        if(d.includes('service')||d.includes('project')||d.includes('requirement')||d.includes('item')) {
+            fields += `<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">${fld('Item / Service')}${fld('Quantity')}</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">${fld('Price (₹)')}${fld('Total (₹)')}</div>${fld('Additional Notes','box')}`
+        }
+        if(d.includes('upload')||d.includes('document')) {
+            fields += `<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">${fld('Primary Document','upload')}${fld('Supporting Document','upload')}</div>`
+        }
+        if(d.includes('signature')||d.includes('declaration')||d.includes('agreement')) {
+            fields += fld('I agree to the Terms and Conditions','check')+fld('All information provided is accurate and complete','check')+`<div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:20px"><div><div style="border-bottom:1.5px solid #111827;margin-top:40px"></div><div style="font-size:9px;color:#9ca3af;margin-top:5px;text-align:center;text-transform:uppercase;letter-spacing:0.5px">Signature</div></div><div><div style="border-bottom:1.5px solid #111827;margin-top:40px"></div><div style="font-size:9px;color:#9ca3af;margin-top:5px;text-align:center;text-transform:uppercase;letter-spacing:0.5px">Date</div></div></div>`
+        }
+        if(!fields) fields = fld('Details','box')
+        return `<div style="margin-bottom:24px;border:1px solid #e5e7eb;border-radius:6px;overflow:hidden"><div style="background:#111827;padding:10px 18px;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#fff">${title}</div><div style="padding:18px">${fields}</div></div>`
+    }).join('')
 
-  return `<!DOCTYPE html><html><head><meta charset="UTF-8">
+    return `<!DOCTYPE html><html><head><meta charset="UTF-8">
 <style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Segoe UI',Arial,sans-serif;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}.page{max-width:680px;margin:0 auto;padding:48px 40px}@media print{.no-print{display:none}}</style>
 </head><body>
 <div class="page">
@@ -459,17 +459,17 @@ ${PRINT_BTN('#111827')}
 
 // ── MODERN (default fallback) ──
 function templateModern(doc, biz) {
-  const cur = doc.currency||'INR'
-  const client = doc.clientInfo||{}
-  const due = dueStr(doc.dueDate)
-  const items = (doc.lineItems||[]).map(item=>`
+    const cur = doc.currency||'INR'
+    const client = doc.clientInfo||{}
+    const due = dueStr(doc.dueDate)
+    const items = (doc.lineItems||[]).map(item=>`
     <tr>
       <td style="padding:11px 14px;border-bottom:1px solid #f1f5f9;font-size:13px;color:#111827;font-weight:500">${item.description}</td>
       <td style="padding:11px 14px;border-bottom:1px solid #f1f5f9;font-size:13px;color:#6b7280;text-align:center">${item.quantity}</td>
       <td style="padding:11px 14px;border-bottom:1px solid #f1f5f9;font-size:13px;color:#6b7280;text-align:right">${fmt(item.rate,cur)}</td>
       <td style="padding:11px 14px;border-bottom:1px solid #f1f5f9;font-size:13px;font-weight:700;color:#16a34a;text-align:right">${fmt(item.amount,cur)}</td>
     </tr>`).join('')
-  return `<!DOCTYPE html><html><head><meta charset="UTF-8">
+    return `<!DOCTYPE html><html><head><meta charset="UTF-8">
 <style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}.page{max-width:794px;margin:0 auto;padding:48px}@media print{.no-print{display:none}.page{padding:36px}}</style>
 </head><body><div class="page">
 <div style="height:4px;background:linear-gradient(90deg,#16a34a,#22c55e);border-radius:2px;margin-bottom:36px"></div>
@@ -532,33 +532,33 @@ ${PRINT_BTN()}
 
 // ── MAIN FUNCTION — auto-select template by document type ──
 function generateInvoiceHTML(document, businessInfo, template='auto') {
-  const biz = businessInfo || {}
-  const docType = document.type || 'invoice'
+    const biz = businessInfo || {}
+    const docType = document.type || 'invoice'
 
-  // Auto-select template based on document type
-  if(template === 'auto' || template === 'modern') {
-    switch(docType) {
-      case 'invoice':        return templateInvoice(document, biz)
-      case 'quotation':      return templateQuotation(document, biz)
-      case 'receipt':        return templateReceipt(document, biz)
-      case 'purchase_order': return templatePurchaseOrder(document, biz)
-      case 'custom_form':    return templateCustomForm(document, biz)
-      default:               return templateModern(document, biz)
+    // Auto-select template based on document type
+    if(template === 'auto' || template === 'modern') {
+        switch(docType) {
+            case 'invoice':        return templateInvoice(document, biz)
+            case 'quotation':      return templateQuotation(document, biz)
+            case 'receipt':        return templateReceipt(document, biz)
+            case 'purchase_order': return templatePurchaseOrder(document, biz)
+            case 'custom_form':    return templateCustomForm(document, biz)
+            default:               return templateModern(document, biz)
+        }
     }
-  }
 
-  // Manual template selection
-  switch(template) {
-    case 'invoice':        return templateInvoice(document, biz)
-    case 'quotation':      return templateQuotation(document, biz)
-    case 'receipt':        return templateReceipt(document, biz)
-    case 'purchase_order': return templatePurchaseOrder(document, biz)
-    case 'custom_form':    return templateCustomForm(document, biz)
-    case 'classic':        return templateModern(document, biz)
-    case 'minimal':        return templateModern(document, biz)
-    case 'bold':           return templateModern(document, biz)
-    default:               return templateModern(document, biz)
-  }
+    // Manual template selection
+    switch(template) {
+        case 'invoice':        return templateInvoice(document, biz)
+        case 'quotation':      return templateQuotation(document, biz)
+        case 'receipt':        return templateReceipt(document, biz)
+        case 'purchase_order': return templatePurchaseOrder(document, biz)
+        case 'custom_form':    return templateCustomForm(document, biz)
+        case 'classic':        return templateModern(document, biz)
+        case 'minimal':        return templateModern(document, biz)
+        case 'bold':           return templateModern(document, biz)
+        default:               return templateModern(document, biz)
+    }
 }
 
-module.exports = { generateInvoiceHTML }
+module.exports = { generateInvoiceHTML }s
