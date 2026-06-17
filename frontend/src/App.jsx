@@ -14,6 +14,9 @@ import ClientDetail from './pages/ClientDetail'
 import Settings from './pages/Settings'
 import Admin from './pages/Admin'
 import Layout from './components/Layout'
+import ResetPassword from './pages/ResetPassword'
+// Add this route:
+<Route path="/reset-password" element={<ResetPassword/>}/>
 
 function PrivateRoute({children}){const{user}=useAuth();return user?children:<Navigate to="/login" replace/>}
 function PublicRoute({children}){const{user}=useAuth();return !user?children:<Navigate to="/dashboard" replace/>}
