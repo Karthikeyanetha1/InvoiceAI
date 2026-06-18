@@ -210,7 +210,11 @@ router.post('/forgot-password', async (req, res) => {
     try {
         const { email } = req.body
         const user = await User.findOne({ email })
-        if (!user) return res.json({ message: 'If that email exists, a reset link was sent.' })
+
+        // Always respond quickly — don't reveal if email exists
+        if (!user) {
+            return res.json({ message: 'If that email exists, a reset link was sent.' })
+        }
 
         const resetToken = crypto.randomBytes(32).toString('hex')
         user.resetToken = resetToken
@@ -219,8 +223,23 @@ router.post('/forgot-password', async (req, res) => {
 
         const resetURL = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}&email=${encodeURIComponent(email)}`
 
-        const transporter = createTransporter()
-        await transporter.sendMail({
+        // Send email in background — don't await
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS
+            },
+            connectionTimeout: 10000,
+            greetingTimeout: 10000,
+            socketTimeout: 10000
+        })
+
+        // Respond immediately
+        res.json({ message: 'Password reset link sent to your email!' })
+
+        // Send email after response
+        transporter.sendMail({
             from: `"InvoiceAI by CodeWithK" <${process.env.EMAIL_USER}>`,
             to: email,
             subject: 'Reset Your InvoiceAI Password',
@@ -234,14 +253,13 @@ router.post('/forgot-password', async (req, res) => {
             <h3 style="color:#111827;margin-bottom:8px">Reset Your Password</h3>
             <p style="color:#6b7280;font-size:14px;line-height:1.7;margin-bottom:20px">
               Hi ${user.name},<br><br>
-              We received a request to reset your InvoiceAI password. Click the button below to set a new password. This link expires in <strong>1 hour</strong>.
+              Click the button below to reset your password. This link expires in <strong>1 hour</strong>.
             </p>
             <a href="${resetURL}" style="display:block;text-align:center;background:#16a34a;color:#fff;padding:13px 24px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px;margin-bottom:20px">
               Reset Password →
             </a>
             <p style="color:#9ca3af;font-size:12px;text-align:center">
-              If you didn't request this, please ignore this email.<br>
-              Your password will remain unchanged.
+              If you didn't request this, ignore this email.
             </p>
           </div>
           <p style="text-align:center;font-size:11px;color:#d1d5db;margin-top:16px">
@@ -249,15 +267,17 @@ router.post('/forgot-password', async (req, res) => {
           </p>
         </div>
       `
+        }).then(() => {
+            console.log('Reset email sent to:', email)
+        }).catch(err => {
+            console.error('Reset email failed:', err.message)
         })
 
-        res.json({ message: 'Password reset link sent to your email!' })
     } catch (err) {
-        console.error('Reset email error:', err)
-        res.status(500).json({ error: 'Failed to send reset email' })
+        console.error('Forgot password error:', err)
+        res.status(500).json({ error: 'Something went wrong. Please try again.' })
     }
 })
-
 // ── Reset password ──
 router.post('/reset-password', async (req, res) => {
     try {
